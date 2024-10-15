@@ -6,6 +6,7 @@ module.exports = {
       'error',
       {
         singleQuote: true,
+        endOfLine: 'lf',
       },
     ],
   },
