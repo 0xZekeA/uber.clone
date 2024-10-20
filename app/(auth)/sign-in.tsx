@@ -1,4 +1,4 @@
-import { Image, Text, View } from 'react-native';
+import { Alert, Image, Text, View } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { images, icons } from '@/constants';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
