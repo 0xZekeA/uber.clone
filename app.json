@@ -13,7 +13,8 @@
       "backgroundColor": "#2F80ED"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.uber"
     },
     "android": {
       "adaptiveIcon": {
