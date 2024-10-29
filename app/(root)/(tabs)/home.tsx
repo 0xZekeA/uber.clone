@@ -51,10 +51,8 @@ export default function Page() {
       });
 
       setUserLocation({
-        // latitude: location.coords.latitude,
-        // longitude: location.coords.longitude,
-        latitude: 37.7749,
-        longitude: -122.4194,
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
         address: `${address[0].name}, ${address[0].region}`,
       });
     };
