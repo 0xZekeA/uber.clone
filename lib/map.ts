@@ -99,19 +99,38 @@ export const calculateDriverTimes = async ({
         `https://maps.googleapis.com/maps/api/directions/json?origin=${marker.latitude},${marker.longitude}&destination=${userLatitude},${userLongitude}&key=${directionsAPI}`
       );
       const dataToUser = await responseToUser.json();
-      const timeToUser = dataToUser.routes[0].legs[0].duration.value; // Time in seconds
+      if (
+        dataToUser.routes &&
+        dataToUser.routes[0] &&
+        dataToUser.routes[0].legs
+      ) {
+        const timeToUser = dataToUser.routes[0].legs[0].duration.value; // Time in seconds
 
-      const responseToDestination = await fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=${userLatitude},${userLongitude}&destination=${destinationLatitude},${destinationLongitude}&key=${directionsAPI}`
-      );
-      const dataToDestination = await responseToDestination.json();
-      const timeToDestination =
-        dataToDestination.routes[0].legs[0].duration.value; // Time in seconds
+        const responseToDestination = await fetch(
+          `https://maps.googleapis.com/maps/api/directions/json?origin=${userLatitude},${userLongitude}&destination=${destinationLatitude},${destinationLongitude}&key=${directionsAPI}`
+        );
+        const dataToDestination = await responseToDestination.json();
 
-      const totalTime = (timeToUser + timeToDestination) / 60; // Total time in minutes
-      const price = (totalTime * 0.5).toFixed(2); // Calculate price based on time
+        if (
+          dataToDestination.routes &&
+          dataToDestination.routes[0] &&
+          dataToDestination.routes[0].legs
+        ) {
+          const timeToDestination =
+            dataToDestination.routes[0].legs[0].duration.value; // Time in seconds
 
-      return { ...marker, time: totalTime, price };
+          const totalTime = (timeToUser + timeToDestination) / 60; // Total time in minutes
+          const price = (totalTime * 0.5).toFixed(2); // Calculate price based on time
+
+          return { ...marker, time: totalTime, price };
+        } else {
+          console.error('Error: No legs found in destination response.');
+          return { ...marker, time: null, price: null }; // Handle cases with missing data
+        }
+      } else {
+        console.error('Error: No legs found in user response.');
+        return { ...marker, time: null, price: null }; // Handle cases with missing data
+      }
     });
 
     return await Promise.all(timesPromises);

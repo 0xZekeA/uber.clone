@@ -1,7 +1,6 @@
 import CustomButton from '@/components/CustomButton';
 import DriverCard from '@/components/DriverCard';
 import RideLayout from '@/components/RideLayout';
-import { drivers } from '@/constants/Drivers';
 import { useDriverStore } from '@/store';
 import { router } from 'expo-router';
 import { useState } from 'react';

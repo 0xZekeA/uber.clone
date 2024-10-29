@@ -1,33 +1,41 @@
 import CustomButton from './CustomButton';
-import { useDriverStore } from '@/store';
-import { useUser } from '@clerk/clerk-expo';
-import { TextInput, View, Text } from 'react-native';
+import { useLocationStore } from '@/store';
+import { useUser, useAuth } from '@clerk/clerk-expo';
+import { Image, TextInput, View, Text } from 'react-native';
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { v4 as uuidv4 } from 'uuid';
 import { PayWithFlutterwave } from 'flutterwave-react-native';
+import ReactNativeModal from 'react-native-modal';
+import { images } from '@/constants';
+import { fetchAPI } from '@/lib/fetch';
+import { PaymentProps } from '@/types/type';
 
-interface PaymentProps {
-  routeLink: string;
-}
-
-const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
-  const { drivers, selectedDriver } = useDriverStore();
+const Payment: React.FC<PaymentProps> = ({
+  fullName,
+  email,
+  amount,
+  driverId,
+  rideTime,
+}) => {
   const { user } = useUser();
+  const { userId } = useAuth();
+  const [success, setSuccess] = useState(false);
+  const {
+    userAddress,
+    userLongitude,
+    userLatitude,
+    destinationLatitude,
+    destinationAddress,
+    destinationLongitude,
+  } = useLocationStore();
+
   const [isConfirmed, setIsConfirmed] = useState(false);
-  const [email, setEmail] = useState(
-    user?.emailAddresses[0].emailAddress || ''
-  );
-  const [name, setName] = useState(user?.fullName || '');
+  const [emailAddress, setEmailAddress] = useState(email || '');
+  const [name, setName] = useState(fullName || '');
   const [phoneNumber, setPhoneNumber] = useState('');
   const flutterwavePublicKey =
     'FLWPUBK_TEST-c3462519f68fd2b3d830962efbfa0ae5-X';
-
-  const driverDetails = drivers?.filter(
-    (driver) => +driver.id === selectedDriver
-  )[0];
-
-  const [amount, setAmount] = useState(Number(driverDetails?.price) || 15000);
 
   const generateTxRef = (): string => 'tx-' + uuidv4();
 
@@ -35,7 +43,7 @@ const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
     console.log(data);
     try {
       const response = await fetch(
-        'https://b342-102-90-46-206.ngrok-free.app/api/transaction',
+        'https://5992-197-210-79-75.ngrok-free.app/api/transaction',
         {
           method: 'POST',
           headers: {
@@ -51,10 +59,29 @@ const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
       );
 
       const result = await response.json();
+      await fetchAPI('/(api)/ride/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          origin_address: userAddress,
+          destination_address: destinationAddress,
+          origin_latitude: userLatitude,
+          origin_longitude: userLongitude,
+          destination_latitude: destinationLatitude,
+          destination_longitude: destinationLongitude,
+          ride_time: rideTime.toFixed(0),
+          fare_price: parseInt(amount) * 100,
+          payment_status: 'paid',
+          driver_id: driverId,
+          user_id: userId,
+        }),
+      });
       console.log(result);
       if (response.ok) {
         console.log('Transaction successfully registered:', result);
-        router.push(routeLink);
+        setSuccess(true);
       } else {
         console.error('Error registering transaction:', result.message);
       }
@@ -72,6 +99,42 @@ const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
           onPress={() => setIsConfirmed(true)}
         />
       ) : null}
+      <ReactNativeModal
+        isVisible={success}
+        onBackdropPress={() => setSuccess(false)}
+      >
+        <View className="min-h-[540px] rounded-2xl bg-white px-7 py-9">
+          <Image
+            source={images.check}
+            className="w-[110px] h-[110px] mx-auto my-5"
+          />
+          <Text className="text-3xl font-JakartaBold text-center">
+            Booking placed successful
+          </Text>
+          <Text className="text-base text-gray-400 font-Jakarta text-center">
+            Thank you for your booking! Your reservation has been successfully
+            placed. Please proceed with your trip.
+          </Text>
+          <CustomButton
+            title="Go Track"
+            onPress={() => {
+              router.push('/(root)/track');
+              setSuccess(false);
+            }}
+            className="mt-5"
+          />
+          <CustomButton
+            title="Back Home"
+            onPress={() => {
+              router.push('/(root)/(tabs)/home');
+              setSuccess(false);
+            }}
+            className="mt-3 mb-5"
+            bgVariant="outline"
+            textVariant="primary"
+          />
+        </View>
+      </ReactNativeModal>
       {isConfirmed ? (
         <View className="mt-20 mb-96">
           <Text className="text-2xl mb-8 text-center font-semibold">
@@ -87,8 +150,8 @@ const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
 
           <TextInput
             placeholder="Email Address"
-            value={email}
-            onChangeText={setEmail}
+            value={emailAddress}
+            onChangeText={setEmailAddress}
             className="border border-gray-300 rounded-lg p-3 mb-6 w-full"
             keyboardType="email-address"
           />
@@ -101,7 +164,9 @@ const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
             keyboardType="phone-pad"
           />
 
-          <Text className="text-lg mb-4">Amount to Pay: ₦{amount}</Text>
+          <Text className="text-lg mb-4">
+            Amount to Pay: ₦{Number(amount) * 1700}
+          </Text>
           <PayWithFlutterwave
             onRedirect={handleOnRedirect}
             options={{
@@ -111,7 +176,7 @@ const Payment: React.FC<PaymentProps> = ({ routeLink }) => {
                 email: email,
                 phonenumber: phoneNumber,
               },
-              amount: amount,
+              amount: Number(1700 * Number(amount)),
               currency: 'NGN',
               payment_options: 'card, banktransfer',
             }}
