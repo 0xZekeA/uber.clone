@@ -3,19 +3,17 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { images, icons } from '@/constants';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import InputField from '@/components/InputField';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CustomButton from '@/components/CustomButton';
 import { Link, router } from 'expo-router';
 import OAuth from '@/components/OAuth';
 import { useSignUp } from '@clerk/clerk-expo';
 import ReactNativeModal from 'react-native-modal';
 import { fetchAPI } from '@/lib/fetch';
-import * as SplashScreen from 'expo-splash-screen'; // New import for SplashScreen
 
 const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isAppReady, setIsAppReady] = useState(false); // Track app readiness
 
   const [form, setForm] = useState({
     name: '',
@@ -94,9 +92,6 @@ const SignUp = () => {
     }
   };
 
-  if (!isAppReady) {
-    return null; // App is not ready, keep showing splash screen
-  }
   return (
     <GestureHandlerRootView>
       <ScrollView className="flex-1 bg-white">
