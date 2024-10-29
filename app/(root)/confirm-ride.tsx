@@ -24,6 +24,7 @@ const ConfirmRide = () => {
             }}
           />
         )}
+        keyExtractor={(item) => item.id.toString()}
         ListFooterComponent={() =>
           isSelected ? (
             <View className="mx-5 mt-10">

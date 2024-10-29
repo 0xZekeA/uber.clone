@@ -10,13 +10,10 @@ import {
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Map from '@/components/Map';
-import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
-} from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef, useState } from 'react';
 
-const RideLayout = ({
+const ConfirmRideLayout = ({
   title,
   children,
   snapPoints,
@@ -89,13 +86,13 @@ const RideLayout = ({
           index={0}
           onChange={handleSheetChanges}
         >
-          <BottomSheetView style={{ flex: 1, padding: 20 }}>
+          <BottomSheetScrollView style={{ flex: 1, padding: 20 }}>
             {children}
-          </BottomSheetView>
+          </BottomSheetScrollView>
         </BottomSheet>
       </View>
     </GestureHandlerRootView>
   );
 };
 
-export default RideLayout;
+export default ConfirmRideLayout;
