@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, useUser } from '@clerk/clerk-expo';
+import { useUser, useAuth } from '@clerk/clerk-expo';
 import { Link, router } from 'expo-router';
 import {
   ActivityIndicator,
@@ -10,22 +10,26 @@ import {
 } from 'react-native';
 import { useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { recentRides } from '@/constants/Rides';
 import RideCard from '@/components/RideCard';
 import { icons, images } from '@/constants';
 import GoogleTextInput from '@/components/GoogleTextInput';
 import Map from '@/components/Map';
 import { useLocationStore } from '@/store';
 import * as Location from 'expo-location';
+import { useFetch } from '@/lib/fetch';
+import ReactNativeModal from 'react-native-modal';
 
 export default function Page() {
   const { setUserLocation, setDestinationLocation } = useLocationStore();
   const { user } = useUser();
-  const loading = true;
-
+  const { signOut } = useAuth();
+  const { data: recentRides, loading } = useFetch(`/(api)/ride/${user?.id}`);
   const [hasPermissions, setHasPermissions] = useState(false);
+  const [isSignOutClicked, setIsSignOutClicked] = useState(false);
 
-  const handleSignOut = () => {};
+  const handleSignOut = () => {
+    setIsSignOutClicked(true);
+  };
   const handleDestinationPress = (location: {
     latitude: number;
     longitude: number;
@@ -57,11 +61,32 @@ export default function Page() {
       });
     };
     requestLoctaion();
-  }, []);
+  }, [setUserLocation]);
 
   return (
     <SafeAreaView>
       <View className="bg-general-500">
+        <ReactNativeModal isVisible={isSignOutClicked}>
+          <View className="bg-white px-7 py-9 rounded-2xl min-h-[100px]">
+            <Text className="text-xl font-JakartaBold text-center">
+              Do you want to sign out?
+            </Text>
+            <View className="flex flex-row items-center justify-between mx-10">
+              <TouchableOpacity onPress={() => setIsSignOutClicked(false)}>
+                <Text className=" text-xl font-JakartaBold">No</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  signOut();
+                  router.replace('/(auth)/sign-in');
+                }}
+                className="mt-5"
+              >
+                <Text className="font-JakartaBold text-xl">Yes</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ReactNativeModal>
         <FlatList
           data={recentRides?.slice(0, 5)}
           renderItem={({ item }) => <RideCard ride={item} />}
