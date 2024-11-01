@@ -164,9 +164,7 @@ const Payment: React.FC<PaymentProps> = ({
             keyboardType="phone-pad"
           />
 
-          <Text className="text-lg mb-4">
-            Amount to Pay: ₦{Number(amount) * 1700}
-          </Text>
+          <Text className="text-lg mb-4">Amount to Pay: ₦{Number(amount)}</Text>
           <PayWithFlutterwave
             onRedirect={handleOnRedirect}
             options={{
@@ -176,7 +174,7 @@ const Payment: React.FC<PaymentProps> = ({
                 email: email,
                 phonenumber: phoneNumber,
               },
-              amount: Number(1700 * Number(amount)),
+              amount: Number(Number(amount)),
               currency: 'NGN',
               payment_options: 'card, banktransfer',
             }}
