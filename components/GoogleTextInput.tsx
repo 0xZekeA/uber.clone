@@ -1,7 +1,7 @@
-import 'react-native-get-random-values';
 import { icons } from '@/constants';
 import { GoogleInputProps } from '@/types/type';
 import { Image, View } from 'react-native';
+import 'react-native-get-random-values';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 
 const googlePlacesApiKey = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
@@ -43,6 +43,9 @@ const GoogleTextInput = ({
       textInputProps={{
         placeholderTextColor: 'gray',
         placeholder: initialLocation ?? 'Where do you want to go?',
+      }}
+      onFail={(error) => {
+        console.log(error);
       }}
       styles={{
         textInputContainer: {

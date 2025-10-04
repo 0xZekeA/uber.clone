@@ -19,3 +19,9 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 .env
+.codegpt
+
+.vscode/
+.expo/
+.expo-shared/
+**/Windows/UUS/**
